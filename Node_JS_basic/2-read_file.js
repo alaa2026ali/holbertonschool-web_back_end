@@ -1,7 +1,3 @@
-المعذرة منك، الغلط كان في طريقة جلب قيم الـ firstname والـ field من المصفوفة بناءً على مكانهم الثابت في ملف الـ CSV.
-إليك الكود الصحيح والجاهز لتجاوز الـ Checker بنسبة 100% وبدون أي تعليقات:
-## 2-read_file.js
-
 const fs = require('fs');
 function countStudents(path) {
   try {
