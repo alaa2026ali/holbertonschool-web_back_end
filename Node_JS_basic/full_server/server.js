@@ -1,13 +1,34 @@
-import express from 'express';
-import controllerRouting from './routes/index';
+const fs = require('fs');
 
-const app = express();
-const port = 1245;
+function readDatabase(path) {
+  return new Promise((resolve, reject) => {
+    fs.readFile(path, 'utf8', (err, data) => {
+      if (err) {
+        reject(Error(err));
+        return;
+      }
+      const content = data.toString().split('\n');
 
-controllerRouting(app);
+      let students = content.filter((item) => item);
 
-app.listen(port, () => {
+      students = students.map((item) => item.split(','));
 
-});
+      const fields = {};
+      for (const i in students) {
+        if (i !== 0) {
+          if (!fields[students[i][3]]) fields[students[i][3]] = [];
 
-export default app;
+          fields[students[i][3]].push(students[i][0]);
+        }
+      }
+
+      delete fields.field;
+
+      resolve(fields);
+
+      //   return fields;
+    });
+  });
+}
+
+export default readDatabase;
