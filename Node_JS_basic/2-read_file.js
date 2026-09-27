@@ -1,38 +1,47 @@
 const fs = require('fs');
 
-const countStudents = (path) => {
+const countStudents = (filePath) => {
+  let fileContent;
   try {
-    const data = fs.readFileSync(path, 'utf8');
-    const lines = data.split('\n').filter((line) => line.trim() !== '');
-    
-    if (lines.length <= 1) {
-      console.log('Number of students: 0');
-      return;
-    }
-
-    const students = lines.slice(1);
-    console.log(`Number of students: ${students.length}`);
-
-    const fieldCounts = {};
-
-    students.forEach((student) => {
-      const details = student.split(',');
-      const firstName = details[0];
-      const field = details[details.length - 1];
-
-      if (firstName && field) {
-        if (!fieldCounts[field]) {
-          fieldCounts[field] = [];
-        }
-        fieldCounts[field].push(firstName);
-      }
-    });
-
-    for (const [field, names] of Object.entries(fieldCounts)) {
-      console.log(`Number of students in ${field}: ${names.length}. List: ${names.join(', ')}`);
-    }
-  } catch (error) {
+    fileContent = fs.readFileSync(filePath, 'utf-8');
+  } catch (err) {
     throw new Error('Cannot load the database');
+  }
+
+  // Handle both LF (\n) and CRLF (\r\n) line endings, and filter out empty lines
+  const lines = fileContent
+    .toString()
+    .split(/\r?\n/)
+    .filter((line) => line.trim() !== '');
+
+  if (lines.length <= 1) {
+    console.log('Number of students: 0');
+    return;
+  }
+
+  // Remove header
+  const studentRows = lines.slice(1);
+  console.log(`Number of students: ${studentRows.length}`);
+
+  const fields = {};
+
+  studentRows.forEach((row) => {
+    const student = row.split(',');
+    if (student.length >= 4) {
+      const firstName = student[0].trim();
+      const field = student[3].trim();
+
+      if (!fields[field]) {
+        fields[field] = [];
+      }
+      fields[field].push(firstName);
+    }
+  });
+
+  for (const [field, students] of Object.entries(fields)) {
+    console.log(
+      `Number of students in ${field}: ${students.length}. List: ${students.join(', ')}`
+    );
   }
 };
 
