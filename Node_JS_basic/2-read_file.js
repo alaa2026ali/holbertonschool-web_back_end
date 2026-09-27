@@ -1,4 +1,5 @@
 const fs = require('fs');
+
 function countStudents(path) {
   try {
     const data = fs.readFileSync(path, 'utf8');
@@ -36,6 +37,3 @@ function countStudents(path) {
 }
 
 module.exports = countStudents;
-
-جرّب هذا الكود الآن للـ Task 2، وبشرني إذا ضبط معك تماماً لننتقل معاً إلى التاسك التالي!
-
