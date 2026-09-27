@@ -2,19 +2,21 @@ const express = require('express');
 const fs = require('fs');
 
 const app = express();
-const database = process.argv[2];
+const DATABASE_FILE = process.argv[2];
 
 function countStudents(path) {
   return new Promise((resolve, reject) => {
-    fs.readFile(path, 'utf-8', (error, content) => {
-      if (error) {
+    fs.readFile(path, 'utf-8', (err, data) => {
+      if (err) {
         reject(new Error('Cannot load the database'));
         return;
       }
 
-      const lines = content
-        .split('\n')
-        .filter((line) => line.trim() !== '');
+      const lines = data.split('\n').filter((line) => line.trim() !== '');
+      if (lines.length <= 1) {
+        resolve('Number of students: 0');
+        return;
+      }
 
       const headers = lines[0].split(',');
       const fieldIndex = headers.indexOf('field');
@@ -25,7 +27,6 @@ function countStudents(path) {
 
       for (let i = 1; i < lines.length; i += 1) {
         const studentData = lines[i].split(',');
-
         if (studentData.length === headers.length) {
           const field = studentData[fieldIndex].trim();
           const firstName = studentData[firstNameIndex].trim();
@@ -33,38 +34,32 @@ function countStudents(path) {
           if (!fields[field]) {
             fields[field] = [];
           }
-
           fields[field].push(firstName);
           totalStudents += 1;
         }
       }
 
-      let result = `Number of students: ${totalStudents}\n`;
-
+      let output = `Number of students: ${totalStudents}`;
       for (const [field, students] of Object.entries(fields)) {
-        result += `Number of students in ${field}: ${students.length}. `;
-        result += `List: ${students.join(', ')}\n`;
+        output += `\nNumber of students in ${field}: ${students.length}. List: ${students.join(', ')}`;
       }
-
-      resolve(result.trim());
+      resolve(output);
     });
   });
 }
 
 app.get('/', (req, res) => {
-  res.type('text').send('Hello Holberton School!');
+  res.send('Hello Holberton School!');
 });
 
-app.get('/students', async (req, res) => {
-  try {
-    const students = await countStudents(database);
-
-    res.type('text').send(
-      `This is the list of our students\n${students}`,
-    );
-  } catch (error) {
-    res.type('text').send(error.message);
-  }
+app.get('/students', (req, res) => {
+  countStudents(DATABASE_FILE)
+    .then((data) => {
+      res.send(`This is the list of our students\n${data}`);
+    })
+    .catch((error) => {
+      res.send(`This is the list of our students\n${error.message}`);
+    });
 });
 
 app.listen(1245);
