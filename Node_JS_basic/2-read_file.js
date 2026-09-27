@@ -1,47 +1,40 @@
 const fs = require('fs');
 
-const countStudents = (dataPath) => {
+const countStudents = (path) => {
+  let data;
   try {
-    // Read the file synchronously with utf8 encoding
-    const fileContent = fs.readFileSync(dataPath, 'utf8');
-    
-    // Split lines and filter out empty lines
-    const lines = fileContent
-      .toString()
-      .split('\n')
-      .filter((line) => line.trim() !== '');
-
-    if (lines.length <= 1) {
-      console.log('Number of students: 0');
-      return;
-    }
-
-    // Remove the header line
-    const studentLines = lines.slice(1);
-    console.log(`Number of students: ${studentLines.length}`);
-
-    const fields = {};
-
-    studentLines.forEach((line) => {
-      const studentRecord = line.split(',');
-      if (studentRecord.length >= 4) {
-        const firstName = studentRecord[0].trim();
-        const field = studentRecord[3].trim();
-
-        if (!fields[field]) {
-          fields[field] = [];
-        }
-        fields[field].push(firstName);
-      }
-    });
-
-    for (const [field, students] of Object.entries(fields)) {
-      console.log(
-        `Number of students in ${field}: ${students.length}. List: ${students.join(', ')}`
-      );
-    }
+    data = fs.readFileSync(path, 'utf8');
   } catch (error) {
     throw new Error('Cannot load the database');
+  }
+
+  const lines = data.split('\n').filter((line) => line.trim() !== '');
+  if (lines.length <= 1) {
+    console.log('Number of students: 0');
+    return;
+  }
+
+  const studentLines = lines.slice(1);
+  console.log(`Number of students: ${studentLines.length}`);
+
+  const studentsByField = {};
+  const studentCountByField = {};
+
+  studentLines.forEach((line) => {
+    const parts = line.split(',');
+    if (parts.length >= 4) {
+      const firstname = parts[0].trim();
+      const field = parts[3].trim();
+
+      if (!studentsByField[field]) {
+        studentsByField[field] = [];
+      }
+      studentsByField[field].push(firstname);
+    }
+  });
+
+  for (const [field, students] of Object.entries(studentsByField)) {
+    console.log(`Number of students in ${field}: ${students.length}. List: ${students.join(', ')}`);
   }
 };
 
