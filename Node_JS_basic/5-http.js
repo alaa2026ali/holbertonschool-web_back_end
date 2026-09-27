@@ -10,25 +10,22 @@ function countStudents(path) {
         reject(new Error('Cannot load the database'));
         return;
       }
-      
+
       const lines = data.split('\n').filter((line) => line.trim() !== '');
       if (lines.length <= 1) {
         resolve('Number of students: 0');
         return;
       }
 
-      const headers = lines[0].split(',');
-      const fieldIndex = headers.indexOf('field');
-      const firstNameIndex = headers.indexOf('firstname');
-
+      const students = lines.slice(1);
       const fields = {};
       let totalStudents = 0;
 
-      for (let i = 1; i < lines.length; i += 1) {
-        const studentData = lines[i].split(',');
-        if (studentData.length === headers.length) {
-          const field = studentData[fieldIndex].trim();
-          const firstName = studentData[firstNameIndex].trim();
+      for (const student of students) {
+        const studentData = student.split(',');
+        if (studentData.length >= 4) {
+          const firstName = studentData[0].trim();
+          const field = studentData[3].trim();
 
           if (!fields[field]) {
             fields[field] = [];
@@ -39,8 +36,8 @@ function countStudents(path) {
       }
 
       let output = `Number of students: ${totalStudents}`;
-      for (const [field, students] of Object.entries(fields)) {
-        output += `\nNumber of students in ${field}: ${students.length}. List: ${students.join(', ')}`;
+      for (const [field, list] of Object.entries(fields)) {
+        output += `\nNumber of students in ${field}: ${list.length}. List: ${list.join(', ')}`;
       }
       resolve(output);
     });
